@@ -1,0 +1,59 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"        # triggers on any tag like v1.0.0, v1.2.3, etc.
+
+permissions:
+  contents: write   # needed to create GitHub Releases and upload assets
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_name: "Shift Scheduler.app"
+            asset_name: ShiftScheduler-mac.zip
+          - os: windows-latest
+            artifact_name: "Shift Scheduler"
+            asset_name: ShiftScheduler-windows.zip
+          - os: ubuntu-latest
+            artifact_name: "Shift Scheduler"
+            asset_name: ShiftScheduler-linux.zip
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pyinstaller reportlab tkcalendar babel
+
+      - name: Build with PyInstaller
+        run: pyinstaller scheduler_app.spec
+
+      - name: Zip artifact (macOS)
+        if: runner.os == 'macOS'
+        run: cd dist && zip -r ../${{ matrix.asset_name }} "Shift Scheduler.app"
+
+      - name: Zip artifact (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path "dist/Shift Scheduler" -DestinationPath "${{ matrix.asset_name }}"
+        shell: pwsh
+
+      - name: Zip artifact (Linux)
+        if: runner.os == 'Linux'
+        run: cd dist && zip -r ../${{ matrix.asset_name }} "Shift Scheduler"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.asset_name }}
