@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.venv/
+venv/
+env/
+
+# PyInstaller
+*.spec.bak
+*.manifest
+
+# Runtime data
+workers.json
+*.pdf
+*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
